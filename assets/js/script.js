@@ -98,7 +98,7 @@ $(".list-group").on("click", "span", function () {
 });
 
 //save edited due date
-$(".list-group").on("blur", "input[type='text']", function() {
+$(".list-group").on("blur", "input[type='text']", function () {
   //get current text
   var date = $(this)
     .val().trim();
@@ -120,7 +120,7 @@ $(".list-group").on("blur", "input[type='text']", function() {
     .text(date);
   //replace input with span element
   $(this).replaceWith(taskSpan);
-  });
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function () {
@@ -163,6 +163,59 @@ $("#remove-tasks").on("click", function () {
     $("#list-" + key).empty();
   }
   saveTasks();
+});
+
+//make task items sortable in their individual columns
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  //update tasks to local storage
+  update: function (event) {
+    //array to store task data
+    var tempArr = [];
+    //loop over current set of children in sortable list
+    $(this).children().each(function () {
+      var text = $(this)
+        .find("p")
+        .text()
+        .trim();
+
+      var date = $(this)
+        .find("span")
+        .text()
+        .trim();
+
+      //add task data to temp array as an object
+      tempArr.push({
+        text: text,
+        date: date
+      });
+    });
+    //trim down list's ID to match object property
+    var arrName = $(this)
+      .attr("id")
+      .replace("list-", "");
+    //update array on tasks onject and save 
+    tasks[arrName] = tempArr;
+    saveTasks();
+  }
+});
+
+//allow tasks to be dropped into TRASH!
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function (event, ui) {
+    ui.draggable.remove();
+  },
+  // over: function (event, ui) {
+  //   console.log("over");
+  // },
+  // out: function (event, ui) {
+  //   console.log("out");
+  // }
 });
 
 // load tasks for the first time
